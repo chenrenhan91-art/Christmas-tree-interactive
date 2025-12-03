@@ -5,18 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>魔法圣诞树 - 辉光珍藏版</title>
 
-    <!-- 让 iOS / 微信内浏览器更“友好”的额外 meta（新增，可选但推荐） -->
+    <!-- iOS / 微信内浏览器友好设置 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no,email=no">
 
-    <!-- 1. 引入 Three.js 核心库 -->
+    <!-- Three.js 核心库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
-    <!-- 2. 引入 OrbitControls -->
+    <!-- OrbitControls -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
-    <!-- 3. 引入后处理相关库 (Bloom Effect) -->
+    <!-- 后处理相关库 (Bloom Effect) -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
@@ -24,7 +24,7 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
     
-    <!-- MediaPipe 库（仍然需要 Hands，本次改动主要是不用 CameraUtils） -->
+    <!-- MediaPipe Hands（这里只用 Hands，不再用 CameraUtils 启动摄像头） -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
@@ -68,7 +68,6 @@
             pointer-events: auto; 
         }
 
-        /* === 这里是关键：为 iOS / 微信内核增加更多 inline 播放相关属性 === */
         #webcam-preview {
             position: absolute;
             bottom: 20px;
@@ -164,12 +163,12 @@
     <!-- 手势光标 -->
     <div id="hand-cursor"></div>
 
-    <!-- === 关键：为 video 增加更多 iOS / 微信兼容属性（新增属性） === -->
+    <!-- iOS / 微信 内核友好属性 -->
     <video
         id="webcam-preview"
         playsinline
         webkit-playsinline
-        x5-playsinline
+        x5-playsinline="true"
         x5-video-player-type="h5"
         x5-video-player-fullscreen="false"
         muted
@@ -290,7 +289,7 @@
         let treeGroup = new THREE.Group(); 
         let scatterGroup = new THREE.Group(); 
         let santaGroup; 
-        let photos = [];
+        let photos = []; // 存储上传的纹理，用于计数
         let snowParticles, iceParticles; 
         let lightStripTexture;
         let gingerbreadTexture; 
@@ -314,7 +313,7 @@
 
         const objectData = []; 
 
-        // === 工具函数：UA 检测，方便给微信 iOS 单独提示 ===
+        // UA 检测：方便给 iOS 微信一些特别提示
         function detectEnv() {
             const ua = navigator.userAgent || '';
             const isWeChat = /MicroMessenger/i.test(ua);
@@ -433,28 +432,1133 @@
             }
         }
 
-        /* ====== 下方很多 three.js 构建场景的函数全部保留，未改动 ======
-           createSanta / createFloor / createSnowBumpMap / createTree / createGingerbreadTexture /
-           createGingerbreadMan / createStripedTexture / createLightStrips / createOrnament /
-           createStar / createGifts / createSnowParticles / createIceParticles /
-           createSnowTexture / createCrystalTexture / handleImageUpload / resetPhotos /
-           createPhotoCard / animate / updateParticles / onWindowResize
-           为了方便你整体复制，我不删减，原样保留
-        */
+        // ================= 以下为场景构建函数（与原版一致） =================
 
-        // ... 这里是你原来的 createSanta / createFloor / createTree 等所有函数 ...
-        // （我不在这里删减，以免丢逻辑，直接照你原版粘回去即可）
-        // === 从这里开始直到 onWindowResize 结束，都用你提供的原代码 ===
+        function createSanta() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 2048; canvas.height = 512; 
+            const ctx = canvas.getContext('2d');
+            
+            function drawRealReindeer(x, y, scale, isRudolph) {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.scale(scale, scale);
+                
+                const furColor = '#8B4513'; 
+                const bellyColor = '#CD853f'; 
+                
+                ctx.fillStyle = furColor;
+                ctx.beginPath();
+                ctx.moveTo(-15, 10); ctx.lineTo(-20, 35); ctx.lineTo(-15, 40); ctx.lineTo(-5, 20);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.moveTo(15, 10); ctx.lineTo(25, 30); ctx.lineTo(20, 35); ctx.lineTo(5, 15);
+                ctx.fill();
 
-        /* -------------- 这一大段我保持不变，省略展示 -------------- */
-        /* 直接把你问题里发的 createSanta ~ onWindowResize 那一整段原样贴回来 */
+                ctx.fillStyle = furColor;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, 30, 15, 0, 0, Math.PI*2);
+                ctx.fill();
+                
+                ctx.fillStyle = bellyColor;
+                ctx.beginPath();
+                ctx.ellipse(0, 5, 20, 8, 0, 0, Math.PI*2);
+                ctx.fill();
 
-        // 为了让答案不炸屏，这里简写：请把你原问题中的
-        // createSanta() 一直到 onWindowResize() 这部分完整粘回到这里
-        // ✅ 不需要做任何修改
-        // （我下面继续从 “// --- MediaPipe 手势识别 ---” 开始给你改好的版本）
+                ctx.fillStyle = furColor;
+                ctx.beginPath();
+                ctx.moveTo(20, -5); ctx.lineTo(35, -25); ctx.lineTo(45, -20); ctx.lineTo(25, 5);
+                ctx.fill();
 
-        // --- MediaPipe 手势识别 ---
+                ctx.beginPath();
+                ctx.ellipse(40, -25, 12, 8, 0.2, 0, Math.PI*2);
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.ellipse(32, -32, 3, 8, -0.5, 0, Math.PI*2);
+                ctx.fill();
+
+                ctx.strokeStyle = '#3e2723';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(38, -32); ctx.lineTo(40, -50); 
+                ctx.moveTo(40, -40); ctx.lineTo(45, -45);
+                ctx.moveTo(40, -45); ctx.lineTo(35, -48);
+                ctx.stroke();
+
+                ctx.fillStyle = 'black';
+                ctx.beginPath(); ctx.arc(42, -28, 1.5, 0, Math.PI*2); ctx.fill();
+
+                if (isRudolph) {
+                    ctx.fillStyle = 'red';
+                    ctx.shadowColor = 'red';
+                    ctx.shadowBlur = 10;
+                } else {
+                    ctx.fillStyle = 'black';
+                    ctx.shadowBlur = 0;
+                }
+                ctx.beginPath(); ctx.arc(52, -25, 2.5, 0, Math.PI*2); ctx.fill();
+                ctx.shadowBlur = 0;
+
+                ctx.strokeStyle = '#d4af37'; 
+                ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.moveTo(25, 0); ctx.lineTo(35, -20); ctx.stroke();
+
+                ctx.restore();
+            }
+
+            function drawSleigh(x, y, scale) {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.scale(scale, scale);
+
+                ctx.strokeStyle = '#FFD700';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(-60, 40); 
+                ctx.bezierCurveTo(-40, 40, 40, 40, 60, 10);
+                ctx.stroke();
+                
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(-40, 40); ctx.lineTo(-40, 10);
+                ctx.moveTo(20, 35); ctx.lineTo(20, 10);
+                ctx.stroke();
+
+                const grad = ctx.createLinearGradient(0, 0, 0, 40);
+                grad.addColorStop(0, '#ff0000');
+                grad.addColorStop(1, '#8b0000');
+                ctx.fillStyle = grad;
+                
+                ctx.beginPath();
+                ctx.moveTo(-50, 10);
+                ctx.bezierCurveTo(-50, 40, 40, 40, 50, 10);
+                ctx.lineTo(60, -10);
+                ctx.bezierCurveTo(30, -5, -30, -5, -60, -20);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.strokeStyle = '#FFD700';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.restore();
+            }
+
+            function drawSantaClaus(x, y, scale) {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.scale(scale, scale);
+
+                ctx.fillStyle = '#d32f2f';
+                ctx.beginPath();
+                ctx.ellipse(0, 10, 25, 30, 0, 0, Math.PI*2);
+                ctx.fill();
+
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 6;
+                ctx.beginPath(); ctx.moveTo(-23, 15); ctx.lineTo(23, 15); ctx.stroke();
+                ctx.strokeStyle = '#FFD700';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(-5, 10, 10, 10);
+
+                ctx.fillStyle = '#ffccaa';
+                ctx.beginPath(); ctx.arc(0, -15, 12, 0, Math.PI*2); ctx.fill();
+
+                ctx.fillStyle = 'black';
+                ctx.beginPath(); ctx.arc(-4, -18, 1.5, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(4, -18, 1.5, 0, Math.PI*2); ctx.fill();
+
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.moveTo(-12, -10);
+                ctx.bezierCurveTo(-15, 10, 15, 10, 12, -10);
+                ctx.fill();
+
+                ctx.fillStyle = '#d32f2f';
+                ctx.beginPath();
+                ctx.moveTo(-12, -22); 
+                ctx.bezierCurveTo(-5, -40, 20, -30, 25, -10);
+                ctx.lineTo(12, -22);
+                ctx.fill();
+                
+                ctx.fillStyle = 'white';
+                ctx.beginPath(); ctx.ellipse(0, -24, 14, 5, 0, 0, Math.PI*2); ctx.fill();
+                
+                ctx.beginPath(); ctx.arc(25, -10, 5, 0, Math.PI*2); ctx.fill();
+
+                ctx.strokeStyle = '#d32f2f';
+                ctx.lineWidth = 10;
+                ctx.lineCap = 'round';
+                ctx.beginPath(); ctx.moveTo(15, 0); ctx.lineTo(35, -20); ctx.stroke();
+                
+                ctx.fillStyle = '#388e3c'; 
+                ctx.beginPath(); ctx.arc(35, -20, 6, 0, Math.PI*2); ctx.fill();
+
+                ctx.restore();
+            }
+
+            const scale = 2.0; 
+            
+            drawRealReindeer(1050, 250, scale, true);
+            drawRealReindeer(950, 265, scale, false);
+            drawRealReindeer(850, 250, scale, false);
+            drawRealReindeer(750, 265, scale, false);
+
+            ctx.strokeStyle = 'rgba(255, 215, 0, 0.6)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(550, 250);
+            ctx.lineTo(1050, 250);
+            ctx.stroke();
+
+            drawSleigh(500, 250, scale);
+            drawSantaClaus(510, 230, scale); 
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.minFilter = THREE.LinearFilter;
+            
+            const width = 120 * (scale / 1.125); 
+            const height = 30 * (scale / 1.125);
+            const geo = new THREE.PlaneGeometry(width, height);
+            const mat = new THREE.MeshBasicMaterial({
+                map: texture,
+                transparent: true,
+                opacity: 1.0,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            });
+
+            const mesh = new THREE.Mesh(geo, mat);
+            
+            santaGroup = new THREE.Group();
+            santaGroup.add(mesh);
+            
+            santaGroup.position.set(-200, 60, -100);
+            santaGroup.rotation.y = Math.PI / 12;
+            
+            scene.add(santaGroup);
+        }
+
+        function createFloor() {
+            const geometry = new THREE.PlaneGeometry(300, 300, 128, 128);
+            const posAttribute = geometry.attributes.position;
+            
+            for (let i = 0; i < posAttribute.count; i++) {
+                const x = posAttribute.getX(i);
+                const y = posAttribute.getY(i);
+                
+                const dist = Math.sqrt(x * x + y * y);
+                
+                let z = Math.sin(x / 25) * Math.cos(y / 25) * 2.5;
+                z += Math.sin(x / 10 + 100) * Math.cos(y / 10) * 0.8;
+                z += (Math.random() - 0.5) * 0.3;
+                
+                if (dist < 15) {
+                    const factor = Math.max(0, (dist - 5) / 10); 
+                    z *= factor;
+                }
+                
+                posAttribute.setZ(i, z);
+            }
+            
+            geometry.computeVertexNormals();
+
+            const snowTexture = createSnowBumpMap();
+
+            const material = new THREE.MeshStandardMaterial({ 
+                color: 0xcccccc,
+                roughness: 0.8,
+                metalness: 0.05,
+                bumpMap: snowTexture,
+                bumpScale: 1.0,
+                emissive: 0x000000,
+                emissiveIntensity: 0.0,
+                side: THREE.DoubleSide
+            });
+            
+            const floor = new THREE.Mesh(geometry, material);
+            floor.rotation.x = -Math.PI / 2; 
+            floor.receiveShadow = true; 
+            scene.add(floor);
+        }
+
+        function createSnowBumpMap() {
+            const size = 512;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = '#808080';
+            ctx.fillRect(0, 0, size, size);
+            
+            const imgData = ctx.getImageData(0, 0, size, size);
+            const data = imgData.data;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                const grain = (Math.random() - 0.5) * 40;
+                data[i] += grain;     
+                data[i+1] += grain;   
+                data[i+2] += grain;   
+            }
+            ctx.putImageData(imgData, 0, 0);
+            
+            ctx.globalCompositeOperation = 'overlay';
+            for (let i = 0; i < 20; i++) {
+                const x = Math.random() * size;
+                const y = Math.random() * size;
+                const r = Math.random() * 100 + 50;
+                
+                const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+                grad.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
+                grad.addColorStop(1, 'rgba(128, 128, 128, 0)');
+                
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(8, 8);
+            return texture;
+        }
+
+        function createTree() {
+            const trunkGeo = new THREE.CylinderGeometry(1.5, 3.0, 10, 12); 
+            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x2b1d16, roughness: 0.9 });
+            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+            trunk.position.y = 5;
+            trunk.castShadow = true;
+            trunk.receiveShadow = true;
+            scene.add(trunk); 
+
+            const levels = 22; 
+            const leafColorBase = new THREE.Color(0x1a4a2a); 
+            
+            for (let i = 0; i < levels; i++) {
+                const t = i / (levels - 1);
+                const y = 5 + i * 1.35; 
+                const radius = 11 * (1 - t * 0.95) + 0.5; 
+                const count = Math.floor(45 + i * 5 * (1-t)); 
+
+                for (let j = 0; j < count; j++) {
+                    const angle = (j / count) * Math.PI * 2 + (i * 1.1) + Math.random() * 0.2; 
+                    const rRandom = radius * (0.85 + Math.random() * 0.3);
+                    
+                    const x = Math.cos(angle) * rRandom;
+                    const z = Math.sin(angle) * rRandom;
+                    
+                    const jitterY = y + (Math.random() - 0.5) * 0.8;
+
+                    const leafColor = leafColorBase.clone().multiplyScalar(0.7 + Math.random() * 0.5);
+                    if (Math.random() > 0.85) {
+                        leafColor.lerp(new THREE.Color(0xffffff), 0.35); 
+                    }
+
+                    const geo = new THREE.ConeGeometry(0.9, 3.5, 6); 
+                    const mat = new THREE.MeshStandardMaterial({
+                        color: leafColor,
+                        roughness: 0.85,
+                        flatShading: true
+                    });
+
+                    const leaf = new THREE.Mesh(geo, mat);
+                    
+                    const originalPos = new THREE.Vector3(x, jitterY, z);
+                    
+                    const scatterDir = new THREE.Vector3(x, y - 5, z).normalize();
+                    const scatterDist = 15 + Math.random() * 25; 
+                    const scatterPos = scatterDir.multiplyScalar(scatterDist);
+                    scatterPos.y += (Math.random() - 0.3) * 30;
+
+                    leaf.position.copy(originalPos);
+                    
+                    const gravityDroop = -2.5 * (1 - t); 
+                    const growthUp = 3.5 * t;            
+                    const verticalOffset = gravityDroop + growthUp;
+
+                    const target = new THREE.Vector3(x * 1.8, jitterY + verticalOffset, z * 1.8);
+                    
+                    leaf.lookAt(target);
+                    leaf.rotateX(Math.PI / 2); 
+                    leaf.rotateZ(Math.random() * 0.5 - 0.25);
+
+                    leaf.castShadow = true;
+                    leaf.receiveShadow = true;
+
+                    scatterGroup.add(leaf);
+
+                    objectData.push({
+                        mesh: leaf,
+                        originalPos: originalPos.clone(),
+                        originalRot: leaf.rotation.clone(),
+                        originalScale: leaf.scale.clone(), 
+                        scatterPos: scatterPos,
+                        rotationSpeed: new THREE.Vector3(Math.random()*0.1, Math.random()*0.1, Math.random()*0.1),
+                        type: 'leaf'
+                    });
+
+                    if (i < levels - 2 && (j + i * 3) % 6 === 0 && Math.random() > 0.25) {
+                        if (Math.random() > 0.8) {
+                            createGingerbreadMan(x, jitterY, z);
+                        } else {
+                            createOrnament(x, jitterY, z, radius);
+                        }
+                    }
+                }
+            }
+            createStar();
+        }
+
+        function createGingerbreadTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            
+            function drawCapsule(x1, y1, x2, y2, width, color) {
+                ctx.beginPath();
+                ctx.lineWidth = width;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = color;
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+            }
+
+            const bodyColor = '#cd853f';
+            
+            drawCapsule(30, 55, 64, 50, 18, bodyColor);
+            drawCapsule(98, 55, 64, 50, 18, bodyColor);
+            
+            drawCapsule(45, 100, 64, 80, 18, bodyColor);
+            drawCapsule(83, 100, 64, 80, 18, bodyColor);
+
+            drawCapsule(64, 40, 64, 85, 30, bodyColor);
+
+            ctx.fillStyle = bodyColor;
+            ctx.beginPath();
+            ctx.arc(64, 30, 22, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = 'white';
+            ctx.beginPath(); ctx.arc(56, 25, 3, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(72, 25, 3, 0, Math.PI*2); ctx.fill();
+
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(64, 32, 10, 0.2, Math.PI - 0.2); ctx.stroke();
+
+            ctx.fillStyle = '#d32f2f';
+            ctx.beginPath(); ctx.arc(64, 55, 4, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#388e3c';
+            ctx.beginPath(); ctx.arc(64, 70, 4, 0, Math.PI*2); ctx.fill();
+
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(25, 50); ctx.quadraticCurveTo(30, 60, 35, 50); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(93, 50); ctx.quadraticCurveTo(98, 60, 103, 50); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(40, 95); ctx.quadraticCurveTo(45, 105, 50, 95); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(78, 95); ctx.quadraticCurveTo(83, 105, 88, 95); ctx.stroke();
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.encoding = THREE.sRGBEncoding;
+            return texture;
+        }
+
+        function createGingerbreadMan(x, y, z) {
+            const width = 1.8;
+            const height = 1.8;
+            const geo = new THREE.PlaneGeometry(width, height);
+            const mat = new THREE.MeshStandardMaterial({
+                map: gingerbreadTexture,
+                transparent: true,
+                alphaTest: 0.1,
+                side: THREE.DoubleSide,
+                roughness: 0.9,
+                metalness: 0.0,
+                emissive: 0xaa6600,
+                emissiveIntensity: 0.2 
+            });
+            const mesh = new THREE.Mesh(geo, mat);
+
+            const posDir = new THREE.Vector3(x, 0, z).normalize();
+            const pos = new THREE.Vector3(x, y, z).add(posDir.multiplyScalar(1.2));
+            
+            const scatterDist = 20 + Math.random() * 15;
+            const scatterPos = pos.clone().normalize().multiplyScalar(scatterDist);
+
+            mesh.position.copy(pos);
+            mesh.lookAt(x*2, y, z*2);
+            mesh.rotation.z += (Math.random() - 0.5) * 0.5;
+
+            mesh.castShadow = true;
+            scatterGroup.add(mesh);
+
+            objectData.push({
+                mesh: mesh,
+                originalPos: pos.clone(),
+                originalRot: mesh.rotation.clone(),
+                originalScale: mesh.scale.clone(), 
+                scatterPos: scatterPos,
+                rotationSpeed: new THREE.Vector3(Math.random()*0.2, Math.random()*0.2, 0),
+                type: 'ornament'
+            });
+        }
+
+        function createStripedTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256; canvas.height = 32;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = '#000000'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const gradient = ctx.createLinearGradient(0, 0, 32, 0);
+            gradient.addColorStop(0, '#ffaa00');
+            gradient.addColorStop(0.5, '#ffffaa');
+            gradient.addColorStop(1, '#ffaa00');
+            ctx.fillStyle = gradient;
+
+            for(let i=0; i<canvas.width; i+=32) {
+                 ctx.beginPath();
+                 ctx.ellipse(i + 16, 16, 14, 10, 0, 0, 2 * Math.PI);
+                 ctx.fill();
+            }
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(20, 1);
+            return texture;
+        }
+
+        function createLightStrips() {
+            const points = [];
+            const turns = 6.5; 
+            const heightSpan = 28;
+            const heightOffset = 5;
+            const radiusBase = 10.5;
+            const pointCount = 200;
+
+            for (let i = 0; i <= pointCount; i++) {
+                const t = i / pointCount; 
+                const angle = t * turns * Math.PI * 2;
+                const y = (1-t) * heightSpan + heightOffset; 
+                
+                const heightRatio = (y - heightOffset) / heightSpan; 
+                const rScaling = 1 - heightRatio; 
+
+                const r = radiusBase * rScaling * 0.95 + 1.5; 
+
+                const x = Math.cos(angle) * r;
+                const z = Math.sin(angle) * r;
+                points.push(new THREE.Vector3(x, y, z));
+            }
+            
+            const curve = new THREE.CatmullRomCurve3(points);
+            const tubeGeo = new THREE.TubeGeometry(curve, pointCount, 0.15, 8, false);
+            
+            lightStripTexture = createStripedTexture();
+            const tubeMat = new THREE.MeshStandardMaterial({
+                map: lightStripTexture,
+                emissiveMap: lightStripTexture,
+                emissive: 0xffaa00, 
+                emissiveIntensity: 4.5,
+                color: 0xffffff,
+                roughness: 0.4,
+                metalness: 0.1,
+                transparent: true,
+                opacity: 0.95
+            });
+
+            const lightStripMesh = new THREE.Mesh(tubeGeo, tubeMat);
+            scene.add(lightStripMesh);
+
+            for(let i=0; i<10; i++) {
+                const t = i / 9;
+                const pos = curve.getPoint(t);
+                const stripLight = new THREE.PointLight(0xffaa00, 1.2, 15);
+                stripLight.position.copy(pos);
+                scene.add(stripLight);
+            }
+        }
+
+        function createOrnament(x, y, z, currentRadius) {
+            const colors = [0xff0000, 0xffd700, 0xffffff, 0xc0c0c0]; 
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const isLight = Math.random() > 0.6; 
+
+            const geo = new THREE.SphereGeometry(0.45, 16, 16);
+            const mat = new THREE.MeshStandardMaterial({
+                color: color,
+                roughness: 0.2,
+                metalness: 0.8,
+                emissive: isLight ? color : 0x000000,
+                emissiveIntensity: isLight ? 1.5 : 0
+            });
+
+            const sphere = new THREE.Mesh(geo, mat);
+            const posDir = new THREE.Vector3(x, 0, z).normalize();
+            const pos = new THREE.Vector3(x, y, z).add(posDir.multiplyScalar(0.8));
+            
+            const scatterDist = 20 + Math.random() * 15;
+            const scatterPos = pos.clone().normalize().multiplyScalar(scatterDist);
+
+            sphere.position.copy(pos);
+            sphere.castShadow = true;
+            scatterGroup.add(sphere);
+
+            objectData.push({
+                mesh: sphere,
+                originalPos: pos.clone(),
+                originalRot: new THREE.Euler(0,0,0),
+                originalScale: sphere.scale.clone(), 
+                scatterPos: scatterPos,
+                rotationSpeed: new THREE.Vector3(Math.random()*0.2, Math.random()*0.2, 0),
+                type: 'ornament'
+            });
+
+            if (isLight && Math.random() > 0.7) {
+                const light = new THREE.PointLight(color, 1, 6);
+                sphere.add(light);
+            }
+        }
+
+        function createStar() {
+            const starShape = new THREE.Shape();
+            const points = 5;
+            const outerRadius = 2.2;
+            const innerRadius = 1.0;
+            
+            for (let i = 0; i < points * 2; i++) {
+                const angle = (i * Math.PI) / points - (Math.PI / 2);
+                const r = (i % 2 === 0) ? outerRadius : innerRadius;
+                
+                const x = Math.cos(angle) * r;
+                const y = Math.sin(angle) * r;
+                
+                if (i === 0) starShape.moveTo(x, y);
+                else starShape.lineTo(x, y);
+            }
+            starShape.closePath();
+
+            const extrudeSettings = {
+                depth: 0.6,
+                bevelEnabled: true,
+                bevelThickness: 0.2,
+                bevelSize: 0.2,
+                bevelSegments: 2
+            };
+
+            const geo = new THREE.ExtrudeGeometry(starShape, extrudeSettings);
+            geo.center();
+
+            const mat = new THREE.MeshStandardMaterial({
+                color: 0xffd700,
+                emissive: 0xffaa00,
+                emissiveIntensity: 5.0, 
+                metalness: 0.8,
+                roughness: 0.1
+            });
+            
+            const star = new THREE.Mesh(geo, mat);
+            const pos = new THREE.Vector3(0, 37, 0);
+            const scatterPos = new THREE.Vector3(0, 42, 0);
+
+            star.position.copy(pos);
+            
+            const starLight = new THREE.PointLight(0xffaa00, 2.2, 60);
+            star.add(starLight);
+
+            scatterGroup.add(star);
+
+            objectData.push({
+                mesh: star,
+                originalPos: pos.clone(),
+                originalRot: new THREE.Euler(0, 0, 0),
+                originalScale: star.scale.clone(), 
+                scatterPos: scatterPos,
+                rotationSpeed: new THREE.Vector3(0, 0.5, 0),
+                type: 'star'
+            });
+        }
+
+        function createGifts() {
+            const boxColors = [0xd32f2f, 0x1976d2, 0x2e7d32, 0xc0c0c0, 0xffd700, 0xffffff];
+            const ribbonColors = [0xffd700, 0xffffff, 0xd32f2f, 0x2e7d32];
+            
+            const placedGifts = [];
+
+            function createOneGift(w, h, d, x, y, z, rotY) {
+                const giftGroup = new THREE.Group();
+
+                const boxGeo = new THREE.BoxGeometry(w, h, d);
+                const boxMat = new THREE.MeshStandardMaterial({
+                    color: boxColors[Math.floor(Math.random() * boxColors.length)],
+                    roughness: 0.6,
+                    metalness: 0.1
+                });
+                const boxMesh = new THREE.Mesh(boxGeo, boxMat);
+                boxMesh.castShadow = true;
+                boxMesh.receiveShadow = true;
+                giftGroup.add(boxMesh);
+
+                const ribbonColor = ribbonColors[Math.floor(Math.random() * ribbonColors.length)];
+                const ribbonMat = new THREE.MeshStandardMaterial({
+                    color: ribbonColor,
+                    roughness: 0.3,
+                    metalness: 0.4,
+                    emissive: ribbonColor,
+                    emissiveIntensity: 0.15
+                });
+
+                const ribbonWidth = Math.min(w, h, d) * 0.18;
+                const thickness = 0.04;
+
+                const wrap1Geo = new THREE.BoxGeometry(w + thickness, ribbonWidth, d + thickness);
+                const wrap1 = new THREE.Mesh(wrap1Geo, ribbonMat);
+                giftGroup.add(wrap1);
+
+                const wrap2Geo = new THREE.BoxGeometry(ribbonWidth, h + thickness, d + thickness);
+                const wrap2 = new THREE.Mesh(wrap2Geo, ribbonMat);
+                giftGroup.add(wrap2);
+
+                const bowGeo = new THREE.DodecahedronGeometry(ribbonWidth * 0.7);
+                const bow = new THREE.Mesh(bowGeo, ribbonMat);
+                bow.position.y = h / 2 + thickness;
+                giftGroup.add(bow);
+
+                giftGroup.position.set(x, y + h / 2, z);
+                giftGroup.rotation.y = rotY;
+
+                scene.add(giftGroup);
+                
+                return { x, y, z, w, h, d, mesh: giftGroup };
+            }
+
+            const baseCount = 18;
+            for (let i = 0; i < baseCount; i++) {
+                const angle = (i / baseCount) * Math.PI * 2 + (Math.random() * 0.5);
+                const dist = 7 + Math.random() * 6;
+                
+                const w = 2.0 + Math.random() * 1.5;
+                const h = 1.5 + Math.random() * 1.5;
+                const d = 2.0 + Math.random() * 1.5;
+                
+                const x = Math.cos(angle) * dist;
+                const z = Math.sin(angle) * dist;
+                const rotY = Math.random() * Math.PI;
+
+                const gift = createOneGift(w, h, d, x, 0, z, rotY);
+                placedGifts.push(gift);
+            }
+
+            const stackCount = 8;
+            for (let i = 0; i < stackCount; i++) {
+                const base = placedGifts[Math.floor(Math.random() * placedGifts.length)];
+                if (base.y > 0 || base.w < 2) continue;
+
+                const w = base.w * (0.6 + Math.random() * 0.2);
+                const h = base.h * (0.6 + Math.random() * 0.3);
+                const d = base.d * (0.6 + Math.random() * 0.2);
+                
+                const x = base.x + (Math.random() - 0.5) * 0.5;
+                const z = base.z + (Math.random() - 0.5) * 0.5;
+                const y = base.h;
+                const rotY = Math.random() * Math.PI;
+
+                createOneGift(w, h, d, x, y, z, rotY);
+            }
+        }
+
+        function createSnowParticles() {
+            const particleCount = 3200;
+            const geom = new THREE.BufferGeometry();
+            const posArray = new Float32Array(particleCount * 3);
+            const sizeArray = new Float32Array(particleCount);
+            const speedArray = new Float32Array(particleCount);
+            const driftArray = new Float32Array(particleCount);
+
+            for(let i=0; i<particleCount; i++) {
+                const i3 = i * 3;
+                posArray[i3] = (Math.random() - 0.5) * 200; 
+                posArray[i3+1] = Math.random() * 120; 
+                posArray[i3+2] = (Math.random() - 0.5) * 200;
+                
+                sizeArray[i] = Math.random() * 0.6 + 0.2; 
+                speedArray[i] = Math.random() * 0.5 + 0.5; 
+                driftArray[i] = Math.random() * Math.PI * 2; 
+            }
+            
+            geom.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            geom.setAttribute('size', new THREE.BufferAttribute(sizeArray, 1));
+            geom.setAttribute('speed', new THREE.BufferAttribute(speedArray, 1));
+            geom.setAttribute('drift', new THREE.BufferAttribute(driftArray, 1));
+
+            const mat = new THREE.PointsMaterial({
+                size: 0.5, 
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false,
+                map: createSnowTexture()
+            });
+            
+            snowParticles = new THREE.Points(geom, mat);
+            scene.add(snowParticles);
+        }
+
+        function createIceParticles() {
+            const particleCount = 900; 
+            const geom = new THREE.BufferGeometry();
+            const posArray = new Float32Array(particleCount * 3);
+            const sizeArray = new Float32Array(particleCount);
+            const speedArray = new Float32Array(particleCount);
+            const driftArray = new Float32Array(particleCount);
+
+            for(let i=0; i<particleCount; i++) {
+                const i3 = i * 3;
+                posArray[i3] = (Math.random() - 0.5) * 244; 
+                posArray[i3+1] = Math.random() * 120; 
+                posArray[i3+2] = (Math.random() - 0.5) * 244;
+                
+                sizeArray[i] = Math.random() * 0.8 + 0.4;
+                speedArray[i] = Math.random() * 0.4 + 0.6;
+                driftArray[i] = Math.random() * Math.PI * 2; 
+            }
+            
+            geom.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            geom.setAttribute('size', new THREE.BufferAttribute(sizeArray, 1));
+            geom.setAttribute('speed', new THREE.BufferAttribute(speedArray, 1));
+            geom.setAttribute('drift', new THREE.BufferAttribute(driftArray, 1));
+
+            const mat = new THREE.PointsMaterial({
+                size: 1.0,
+                color: 0x0088ff, 
+                transparent: true,
+                opacity: 0.95,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false,
+                map: createCrystalTexture()
+            });
+            
+            iceParticles = new THREE.Points(geom, mat);
+            scene.add(iceParticles);
+        }
+        
+        function createSnowTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64; canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createRadialGradient(32,32,0, 32,32,32);
+            grad.addColorStop(0, 'rgba(255,255,255,1)');
+            grad.addColorStop(0.4, 'rgba(200,230,255,0.8)');
+            grad.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0,0,64,64);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function createCrystalTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.translate(64, 64);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.shadowBlur = 5;
+            ctx.shadowColor = '#ffffff';
+
+            for (let i = 0; i < 6; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(0, 50);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(0, 30);
+                ctx.lineTo(15, 40);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(0, 30);
+                ctx.lineTo(-15, 40);
+                ctx.stroke();
+                
+                ctx.rotate(Math.PI / 3);
+            }
+            
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        // =============== 上传图片 & 挂饰创建（已修复 iOS 不显示问题） ===============
+
+        // 替换版：使用 FileReader + Image，兼容 iOS，防止纹理尺寸为 0
+        function handleImageUpload(event) {
+            const files = event.target.files;
+            if (!files || !files.length) return;
+
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+
+                reader.onload = (e) => {
+                    const dataUrl = e.target.result;
+
+                    const img = new Image();
+                    img.onload = () => {
+                        const texture = new THREE.Texture(img);
+                        texture.encoding = THREE.sRGBEncoding;
+                        texture.needsUpdate = true;
+
+                        createPhotoCard(texture);
+                        photos.push(texture);
+                        document.getElementById('photo-count').innerText =
+                            `已添加 ${photos.length} 张`;
+                    };
+
+                    img.onerror = (err) => {
+                        console.error('图片加载失败', err);
+                    };
+
+                    img.src = dataUrl;
+                };
+
+                reader.onerror = (err) => {
+                    console.error('FileReader 读取失败', err);
+                };
+
+                reader.readAsDataURL(file);
+            });
+
+            // iOS 上需要清空 value，否则重复选择同一张图片不会触发 change
+            event.target.value = '';
+        }
+
+        // 重置照片：清掉所有 type === 'photo' 的挂饰
+        function resetPhotos() {
+            for (let i = objectData.length - 1; i >= 0; i--) {
+                if (objectData[i].type === 'photo') {
+                    const item = objectData[i];
+                    scatterGroup.remove(item.mesh);
+                    if (item.mesh.geometry) item.mesh.geometry.dispose();
+                    if (item.mesh.material) {
+                        if (item.mesh.material.map) item.mesh.material.map.dispose();
+                        item.mesh.material.dispose();
+                    }
+                    objectData.splice(i, 1);
+                }
+            }
+            photos = [];
+            document.getElementById('photo-count').innerText = `已添加 0 张`;
+        }
+
+        // 替换版：防止纹理宽高为 0 / NaN 导致平面不可见
+        function createPhotoCard(texture) {
+            let aspect = 1;
+            if (texture.image && texture.image.width && texture.image.height) {
+                aspect = texture.image.width / texture.image.height;
+            } else {
+                console.warn('纹理尺寸异常，使用 1:1 默认比例');
+            }
+
+            let baseSize = 4;
+            if (currentPhotoSizeSetting === 'medium') {
+                baseSize = 5.5;
+            } else if (currentPhotoSizeSetting === 'large') {
+                baseSize = 7.5;
+            }
+
+            let w = baseSize;
+            let h = baseSize / aspect;
+            if (h > baseSize) {
+                h = baseSize;
+                w = baseSize * aspect;
+            }
+
+            if (!isFinite(w) || w <= 0) w = baseSize;
+            if (!isFinite(h) || h <= 0) h = baseSize;
+
+            const geo = new THREE.PlaneGeometry(w, h);
+            const mat = new THREE.MeshStandardMaterial({ 
+                map: texture, 
+                side: THREE.DoubleSide,
+                roughness: 0.3,
+                metalness: 0.1,
+                emissive: 0xffffff, 
+                emissiveMap: texture,
+                emissiveIntensity: 0.2
+            });
+            const mesh = new THREE.Mesh(geo, mat);
+            
+            mesh.userData = { type: 'photo' };
+
+            const y = 10 + Math.random() * 18; 
+            const rHeightRatio = (y - 5) / 28; 
+            const rAtY = 10 * (1 - rHeightRatio * 0.9); 
+            
+            const angle = Math.random() * Math.PI * 2;
+            const radiusOffset = 2.5 + (baseSize - 4) * 0.3; 
+            const x = Math.cos(angle) * (rAtY + radiusOffset); 
+            const z = Math.sin(angle) * (rAtY + radiusOffset);
+
+            const originalPos = new THREE.Vector3(x, y, z);
+            const scatterDist = 28 + Math.random() * 15;
+            const scatterPos = originalPos.clone().normalize().multiplyScalar(scatterDist);
+
+            mesh.position.copy(originalPos);
+            mesh.lookAt(x*2, y + 2, z*2);
+            const originalRot = mesh.rotation.clone();
+
+            scatterGroup.add(mesh);
+
+            objectData.push({
+                mesh: mesh,
+                originalPos: originalPos,
+                originalRot: originalRot,
+                originalScale: mesh.scale.clone(), 
+                scatterPos: scatterPos,
+                rotationSpeed: new THREE.Vector3(Math.random()*0.08, Math.random()*0.08, 0),
+                type: 'photo'
+            });
+        }
+
+        // ======================== 动画循环 ========================
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const delta = clock.getDelta();
+            const time = clock.getElapsedTime();
+
+            if (controls) controls.update();
+
+            if (santaGroup) {
+                santaGroup.position.x += delta * 15;
+                santaGroup.position.y = 60 + Math.sin(time) * 2;
+                if (santaGroup.position.x > 200) {
+                    santaGroup.position.x = -200;
+                }
+            }
+
+            const speed = 1.5; 
+            if (Math.abs(currentFactor - targetFactor) > 0.01) {
+                currentFactor += (targetFactor - currentFactor) * speed * delta;
+            } else {
+                currentFactor = targetFactor;
+            }
+            
+            if (scatterLight) {
+                scatterLight.intensity = currentFactor * 1.0; 
+            }
+
+            objectData.forEach(data => {
+                const mesh = data.mesh;
+
+                let focusedItem = null;
+                if (focusedPhoto) {
+                    focusedItem = objectData.find(item => item.mesh === focusedPhoto);
+                }
+                
+                if (focusedItem && data === focusedItem) {
+                    const targetPos = new THREE.Vector3(0, 0, -20).applyMatrix4(camera.matrixWorld);
+                    mesh.position.lerp(targetPos, 0.1);
+                    mesh.lookAt(camera.position);
+                    
+                    const targetScale = data.originalScale.clone().multiplyScalar(3.0);
+                    mesh.scale.lerp(targetScale, 0.1);
+                    
+                    if(mesh.material.emissiveIntensity !== undefined) {
+                        mesh.material.emissiveIntensity = 0.6;
+                    }
+
+                } else {
+                    mesh.position.lerpVectors(data.originalPos, data.scatterPos, currentFactor);
+
+                    let targetScaleScalar = 1.0;
+                    if (data.type === 'photo') {
+                        targetScaleScalar = 2.2; 
+                        if(mesh.material.emissiveIntensity !== undefined) {
+                             mesh.material.emissiveIntensity = THREE.MathUtils.lerp(0.2, 0.4, currentFactor);
+                        }
+                    } else {
+                        targetScaleScalar = 0.2; 
+                    }
+                    
+                    const targetScale = data.originalScale.clone().multiplyScalar(targetScaleScalar);
+                    mesh.scale.lerpVectors(data.originalScale, targetScale, currentFactor);
+
+                    const fogStart = 0.02;
+                    const fogEnd = 0.002;
+                    scene.fog.density = fogStart + (fogEnd - fogStart) * currentFactor; 
+
+                    if (currentFactor > 0.05) {
+                        mesh.rotation.x += data.rotationSpeed.x;
+                        mesh.rotation.y += data.rotationSpeed.y;
+                        mesh.rotation.z += data.rotationSpeed.z;
+                    } else {
+                        if (data.type === 'leaf' || data.type === 'photo') {
+                            mesh.rotation.set(data.originalRot.x, data.originalRot.y, data.originalRot.z);
+                        }
+                        if (data.type === 'star' || data.type === 'ornament') {
+                            mesh.rotation.y += delta * 0.2;
+                        }
+                    }
+                }
+            });
+
+            updateParticles(snowParticles, time, delta);
+            updateParticles(iceParticles, time, delta);
+
+            if (lightStripTexture) {
+                lightStripTexture.offset.x -= delta * 0.3;
+            }
+
+            if (composer) {
+                composer.render();
+            } else {
+                renderer.render(scene, camera);
+            }
+        }
+
+        function updateParticles(pSystem, time, delta) {
+            if (!pSystem) return;
+            const positions = pSystem.geometry.attributes.position.array;
+            const speeds = pSystem.geometry.attributes.speed.array;
+            const drifts = pSystem.geometry.attributes.drift.array;
+
+            for(let i=0; i<speeds.length; i++) {
+                const i3 = i * 3;
+                positions[i3 + 1] -= delta * 5 * speeds[i]; 
+                positions[i3] += Math.sin(time + drifts[i]) * 0.05;
+                positions[i3 + 2] += Math.cos(time + drifts[i]) * 0.05;
+
+                if (positions[i3 + 1] < 0) {
+                    positions[i3 + 1] = 100; 
+                    positions[i3] = (Math.random() - 0.5) * 200;
+                    positions[i3 + 2] = (Math.random() - 0.5) * 200;
+                }
+            }
+            pSystem.geometry.attributes.position.needsUpdate = true;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            if (composer) {
+                composer.setSize(window.innerWidth, window.innerHeight);
+            }
+        }
+
+        // ======================== MediaPipe 手势识别（新版） ========================
+
         async function setupMediaPipe() {
             const videoElement = document.getElementById('webcam-preview');
             const startBtn = document.getElementById('start-btn');
@@ -462,7 +1566,6 @@
             const statusPanel = document.getElementById('gesture-status');
             const statusText = document.getElementById('status-text');
 
-            // 确保 iOS / 微信 内核也认为是 inline 播放
             videoElement.setAttribute('playsinline', '');
             videoElement.setAttribute('webkit-playsinline', '');
             videoElement.setAttribute('x5-playsinline', 'true');
@@ -481,7 +1584,6 @@
 
             hands.onResults(onResults);
 
-            // === ⭐ 关键改动：不再使用 CameraUtils，而是手写 getUserMedia 逻辑 ⭐
             async function startCamera() {
                 if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                     loadingOverlay.classList.add('hidden');
@@ -506,17 +1608,13 @@
                     });
 
                     videoElement.srcObject = stream;
-
-                    // 必须在用户点击之后显式 play，iOS/微信才愿意播
                     await videoElement.play();
 
                     loadingOverlay.classList.add('hidden');
                     statusPanel.classList.remove('hidden');
                     statusText.innerText = "手势检测就绪";
 
-                    // 用 requestAnimationFrame 自己跑帧，喂给 MediaPipe
                     async function frameLoop() {
-                        // 有时 iOS 会在后台把视频暂停，这里做个保护
                         if (videoElement.readyState >= 2) {
                             await hands.send({ image: videoElement });
                         }
