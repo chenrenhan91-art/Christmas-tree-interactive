@@ -5,18 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>魔法圣诞树 - 辉光珍藏版</title>
 
-    <!-- iOS / 微信内浏览器友好设置 -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="format-detection" content="telephone=no,email=no">
+    <!-- ================= 微信 / QQ / 朋友圈 分享卡片信息 ================= -->
+    <!-- 页面简介（分享时的副标题 & 搜索引擎简介） -->
+    <meta name="description" content="伸出你的手势，与辉光圣诞树互动，上传照片挂饰，让星光飞散与温暖汇聚，在浏览器里体验一场专属的圣诞魔法。">
 
-    <!-- Three.js 核心库 -->
+    <!-- Open Graph 基本信息：微信/QQ/钉钉等都会优先读取这里 -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="魔法圣诞树 - 辉光珍藏版">
+    <meta property="og:description" content="伸出你的手势，与辉光圣诞树互动，上传照片挂饰，让星光飞散与温暖汇聚，在浏览器里体验一场专属的圣诞魔法。">
+
+    <!-- ✅ 封面图：PNG 格式，放在 GitHub 仓库的 assets/share-cover.png -->
+    <meta property="og:image" content="https://chenrenhan91-art.github.io/Christmas-tree-interactive/assets/share-cover.png">
+
+    <!-- ✅ 页面正式访问 URL（你的 GitHub Pages 地址） -->
+    <meta property="og:url" content="https://chenrenhan91-art.github.io/Christmas-tree-interactive/">
+
+    <!-- 兼容部分平台（如 Twitter），不影响微信，但顺带加上 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="魔法圣诞树 - 辉光珍藏版">
+    <meta name="twitter:description" content="伸出你的手势，与辉光圣诞树互动，上传照片挂饰，让星光飞散与温暖汇聚，在浏览器里体验一场专属的圣诞魔法。">
+    <meta name="twitter:image" content="https://chenrenhan91-art.github.io/Christmas-tree-interactive/assets/share-cover.png">
+
+    <!-- 小图标，可以先直接复用封面图，之后你也可以换成专门的 icon -->
+    <link rel="icon" href="https://chenrenhan91-art.github.io/Christmas-tree-interactive/assets/share-cover.png" type="image/png">
+
+    <!-- 为了在微信内浏览器更友好（避免 referrer 问题） -->
+    <meta name="referrer" content="no-referrer">
+
+    <!-- ================ 下面开始是你原本的脚本和样式 ================ -->
+
+    <!-- 1. 引入 Three.js 核心库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
-    <!-- OrbitControls -->
+    <!-- 2. 引入 OrbitControls -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
-    <!-- 后处理相关库 (Bloom Effect) -->
+    <!-- 3. 引入后处理相关库 (Bloom Effect) -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
@@ -24,7 +48,7 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
     
-    <!-- MediaPipe Hands（这里只用 Hands，不再用 CameraUtils 启动摄像头） -->
+    <!-- MediaPipe 库 -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
@@ -36,8 +60,9 @@
         body {
             margin: 0;
             overflow: hidden;
+            /* 保持深邃的冰蓝夜空背景，与暖光形成对比 */
             background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
-            font-family: -apple-system, BlinkMacSystemFont, system-ui, "PingFang SC", "Hiragino Sans GB", sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
         }
 
@@ -75,7 +100,7 @@
             width: 160px;
             height: 120px;
             border-radius: 12px;
-            border: 2px solid rgba(255, 215, 0, 0.5);
+            border: 2px solid rgba(255, 215, 0, 0.5); /* 改回金色边框呼应暖光 */
             transform: scaleX(-1); 
             opacity: 0.8;
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
@@ -83,6 +108,7 @@
             background: black;
         }
         
+        /* 移动端优化：左侧面板在小屏上宽度更大 */
         #main-control-panel {
             max-width: 400px;
         }
@@ -94,7 +120,7 @@
         }
 
         .glass-panel {
-            background: rgba(20, 20, 30, 0.4);
+            background: rgba(20, 20, 30, 0.4); /* 稍微加深背景以突出文字 */
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 16px;
@@ -117,6 +143,7 @@
         }
 
         .glow-text {
+            /* 暖金色文字光效 */
             text-shadow: 0 0 10px #ffaa00, 0 0 20px #ff6600;
         }
         
@@ -124,16 +151,19 @@
             transition: all 0.3s ease;
         }
 
+        /* 自定义单选按钮样式 */
         .size-radio:checked + span {
             color: #ffd700;
             font-weight: bold;
             text-shadow: 0 0 5px #ffaa00;
         }
         
+        /* 旋转动画用于折叠按钮 */
         .rotate-180 {
             transform: rotate(180deg);
         }
 
+        /* 手势光标样式 */
         #hand-cursor {
             position: absolute;
             width: 20px;
@@ -142,10 +172,10 @@
             border-radius: 50%;
             background: rgba(255, 215, 0, 0.3);
             box-shadow: 0 0 10px #ffd700;
-            pointer-events: none;
+            pointer-events: none; /* 不阻挡鼠标事件 */
             z-index: 50;
             transform: translate(-50%, -50%);
-            display: none;
+            display: none; /* 默认隐藏 */
             transition: width 0.1s, height 0.1s, background-color 0.1s;
         }
         #hand-cursor.clicking {
@@ -156,6 +186,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div id="canvas-container"></div>
@@ -1755,3 +1786,4 @@
     </script>
 </body>
 </html>
+
