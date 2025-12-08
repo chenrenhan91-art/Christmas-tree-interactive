@@ -6,41 +6,38 @@
     <title>魔法圣诞树 - 辉光珍藏版</title>
 
     <!-- ================= 微信 / QQ / 朋友圈 分享卡片信息 ================= -->
-    <!-- 页面简介（分享时的副标题 & 搜索引擎简介） -->
     <meta name="description" content="伸出你的手势，与辉光圣诞树互动，上传照片挂饰，让星光飞散与温暖汇聚，在浏览器里体验一场专属的圣诞魔法。">
 
-    <!-- Open Graph 基本信息：微信/QQ/钉钉等都会优先读取这里 -->
+    <!-- Open Graph 基本信息 -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="魔法圣诞树 - 辉光珍藏版">
     <meta property="og:description" content="伸出你的手势，与辉光圣诞树互动，上传照片挂饰，让星光飞散与温暖汇聚，在浏览器里体验一场专属的圣诞魔法。">
 
-    <!-- ✅ 封面图：PNG 格式，放在 GitHub 仓库的 assets/share-cover.png -->
-    <meta property="og:image" content="https://chenrenhan91-art.github.io/Christmas-tree-interactive/assets/share-cover.png">
-
-    <!-- ✅ 页面正式访问 URL（你的 GitHub Pages 地址） -->
+    <!-- 🟩 封面图（方案 A：share-cover.png 放在根目录） -->
+    <meta property="og:image" content="https://chenrenhan91-art.github.io/Christmas-tree-interactive/share-cover.png?v=3">
     <meta property="og:url" content="https://chenrenhan91-art.github.io/Christmas-tree-interactive/">
 
-    <!-- 兼容部分平台（如 Twitter），不影响微信，但顺带加上 -->
+    <!-- Twitter / iMessage 分享预览 -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="魔法圣诞树 - 辉光珍藏版">
     <meta name="twitter:description" content="伸出你的手势，与辉光圣诞树互动，上传照片挂饰，让星光飞散与温暖汇聚，在浏览器里体验一场专属的圣诞魔法。">
-    <meta name="twitter:image" content="https://chenrenhan91-art.github.io/Christmas-tree-interactive/assets/share-cover.png">
+    <meta name="twitter:image" content="https://chenrenhan91-art.github.io/Christmas-tree-interactive/share-cover.png?v=3">
 
-    <!-- 小图标，可以先直接复用封面图，之后你也可以换成专门的 icon -->
-    <link rel="icon" href="https://chenrenhan91-art.github.io/Christmas-tree-interactive/assets/share-cover.png" type="image/png">
+    <!-- 浏览器 favicon（沿用封面图） -->
+    <link rel="icon" href="https://chenrenhan91-art.github.io/Christmas-tree-interactive/share-cover.png?v=3" type="image/png">
 
-    <!-- 为了在微信内浏览器更友好（避免 referrer 问题） -->
+    <!-- 确保微信不会屏蔽资源 -->
     <meta name="referrer" content="no-referrer">
 
-    <!-- ================ 下面开始是你原本的脚本和样式 ================ -->
+    <!-- ================ 以下为你原始脚本和样式，无需改动 ================ -->
 
-    <!-- 1. 引入 Three.js 核心库 -->
+    <!-- 1. Three.js 核心库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
-    <!-- 2. 引入 OrbitControls -->
+    <!-- 2. OrbitControls -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
-    <!-- 3. 引入后处理相关库 (Bloom Effect) -->
+    <!-- 3. Bloom 后处理 -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
@@ -60,7 +57,6 @@
         body {
             margin: 0;
             overflow: hidden;
-            /* 保持深邃的冰蓝夜空背景，与暖光形成对比 */
             background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
@@ -72,26 +68,15 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1;
-        }
-
-        #ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
             z-index: 10;
-            pointer-events: none; 
+            pointer-events: none;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             padding: 20px;
         }
 
-        .interactive-element {
-            pointer-events: auto; 
-        }
+        .interactive-element { pointer-events: auto; }
 
         #webcam-preview {
             position: absolute;
@@ -100,32 +85,24 @@
             width: 160px;
             height: 120px;
             border-radius: 12px;
-            border: 2px solid rgba(255, 215, 0, 0.5); /* 改回金色边框呼应暖光 */
-            transform: scaleX(-1); 
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            transform: scaleX(-1);
             opacity: 0.8;
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
             z-index: 20;
             background: black;
         }
         
-        /* 移动端优化：左侧面板在小屏上宽度更大 */
-        #main-control-panel {
-            max-width: 400px;
-        }
-        @media (max-width: 768px) {
-            #main-control-panel {
-                width: 90vw;
-                max-width: none;
-            }
-        }
+        #main-control-panel { max-width: 400px; }
+        @media (max-width: 768px) { #main-control-panel { width: 90vw; max-width: none; } }
 
         .glass-panel {
-            background: rgba(20, 20, 30, 0.4); /* 稍微加深背景以突出文字 */
+            background: rgba(20, 20, 30, 0.4);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 16px;
             padding: 20px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
         }
 
         .loader {
@@ -137,33 +114,19 @@
             animation: spin 1s linear infinite;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .glow-text {
-            /* 暖金色文字光效 */
-            text-shadow: 0 0 10px #ffaa00, 0 0 20px #ff6600;
-        }
-        
-        #gesture-status {
-            transition: all 0.3s ease;
-        }
+        .glow-text { text-shadow: 0 0 10px #ffaa00, 0 0 20px #ff6600; }
+        #gesture-status { transition: all 0.3s ease; }
 
-        /* 自定义单选按钮样式 */
         .size-radio:checked + span {
             color: #ffd700;
             font-weight: bold;
             text-shadow: 0 0 5px #ffaa00;
         }
         
-        /* 旋转动画用于折叠按钮 */
-        .rotate-180 {
-            transform: rotate(180deg);
-        }
+        .rotate-180 { transform: rotate(180deg); }
 
-        /* 手势光标样式 */
         #hand-cursor {
             position: absolute;
             width: 20px;
@@ -172,10 +135,10 @@
             border-radius: 50%;
             background: rgba(255, 215, 0, 0.3);
             box-shadow: 0 0 10px #ffd700;
-            pointer-events: none; /* 不阻挡鼠标事件 */
+            pointer-events: none;
             z-index: 50;
             transform: translate(-50%, -50%);
-            display: none; /* 默认隐藏 */
+            display: none;
             transition: width 0.1s, height 0.1s, background-color 0.1s;
         }
         #hand-cursor.clicking {
@@ -1786,4 +1749,5 @@
     </script>
 </body>
 </html>
+
 
