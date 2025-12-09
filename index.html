@@ -13,8 +13,11 @@
     <meta property="og:title" content="魔法圣诞树 - 辉光珍藏版">
     <meta property="og:description" content="伸出你的手势，与辉光圣诞树互动，上传照片挂饰，让星光飞散与温暖汇聚，在浏览器里体验一场专属的圣诞魔法。">
 
-    <!-- ⭐ 封面图：JPG，放在仓库根目录（和 index.html 同级） -->
-    <meta property="og:image" content="https://chenrenhan91-art.github.io/Christmas-tree-interactive/share-cover.jpg?v=2">
+    <!-- 重点：封面图（必须可访问） -->
+    <meta property="og:image" content="https://chenrenhan91-art.github.io/Christmas-tree-interactive/share-cover.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
 
     <!-- 页面正式访问 URL -->
     <meta property="og:url" content="https://chenrenhan91-art.github.io/Christmas-tree-interactive/">
@@ -23,15 +26,13 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="魔法圣诞树 - 辉光珍藏版">
     <meta name="twitter:description" content="伸出你的手势，与辉光圣诞树互动，上传照片挂饰，让星光飞散与温暖汇聚，在浏览器里体验一场专属的圣诞魔法。">
-    <meta name="twitter:image" content="https://chenrenhan91-art.github.io/Christmas-tree-interactive/share-cover.jpg?v=2">
+    <meta name="twitter:image" content="https://chenrenhan91-art.github.io/Christmas-tree-interactive/share-cover.jpg">
 
-    <!-- 小图标：先直接用封面图 -->
-    <link rel="icon" href="https://chenrenhan91-art.github.io/Christmas-tree-interactive/share-cover.jpg?v=2" type="image/jpeg">
+    <!-- 小图标 -->
+    <link rel="icon" href="https://chenrenhan91-art.github.io/Christmas-tree-interactive/share-cover.jpg" type="image/jpeg">
 
     <!-- 避免微信 referrer 限制 -->
     <meta name="referrer" content="no-referrer">
-
-    <!-- ================ 下面开始是你原本的脚本和样式 ================ -->
 
     <!-- Three.js 核心库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -181,6 +182,11 @@
 </head>
 
 <body>
+
+    <!-- 隐藏封面图：帮助微信 / QQ 抓取缩略图 -->
+    <img src="share-cover.jpg"
+         alt="辉光圣诞树封面"
+         style="width:0;height:0;opacity:0;position:absolute;left:-9999px;top:-9999px;">
 
     <div id="canvas-container"></div>
     
@@ -456,7 +462,7 @@
             }
         }
 
-        // ================= 以下为场景构建函数（与原版一致） =================
+        // ================= 以下为场景构建函数 =================
 
         function createSanta() {
             const canvas = document.createElement('canvas');
@@ -1322,9 +1328,8 @@
             return new THREE.CanvasTexture(canvas);
         }
 
-        // =============== 上传图片 & 挂饰创建（已修复 iOS 不显示问题） ===============
+        // =============== 上传图片 & 挂饰创建 ===============
 
-        // 替换版：使用 FileReader + Image，兼容 iOS，防止纹理尺寸为 0
         function handleImageUpload(event) {
             const files = event.target.files;
             if (!files || !files.length) return;
@@ -1365,7 +1370,6 @@
             event.target.value = '';
         }
 
-        // 重置照片：清掉所有 type === 'photo' 的挂饰
         function resetPhotos() {
             for (let i = objectData.length - 1; i >= 0; i--) {
                 if (objectData[i].type === 'photo') {
@@ -1383,7 +1387,6 @@
             document.getElementById('photo-count').innerText = `已添加 0 张`;
         }
 
-        // 替换版：防止纹理宽高为 0 / NaN 导致平面不可见
         function createPhotoCard(texture) {
             let aspect = 1;
             if (texture.image && texture.image.width && texture.image.height) {
@@ -1581,7 +1584,7 @@
             }
         }
 
-        // ======================== MediaPipe 手势识别（新版） ========================
+        // ======================== MediaPipe 手势识别 ========================
 
         async function setupMediaPipe() {
             const videoElement = document.getElementById('webcam-preview');
@@ -1779,7 +1782,3 @@
     </script>
 </body>
 </html>
-
-
-
-
